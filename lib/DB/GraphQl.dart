@@ -161,3 +161,61 @@ Future<List> iniciandoSesion({@required String email, @required String pass})asy
 limpiarGrapql(){
   _client.cache.reset();
 }
+
+/////////////////
+const String insertM = r'''
+  mutation InsertMuseo($name: String = "", $description: String = "", $diasHabiles: json = "", $horarioApertura: String = "", $horarioCierre: String = "", $imageURL: String = "", $ubicacion: String = "") {
+  insert_Museo(objects: {name: $name, description: $description, diasHabiles: $diasHabiles, horarioApertura: $horarioApertura, horarioCierre: $horarioCierre, imageURL: $imageURL, ubicacion: $ubicacion}) {
+    returning {
+      idMuseo
+      name
+      imageURL
+      ubicacion
+      horarioApertura
+      horarioCierre
+      diasHabiles
+      description
+    }
+  }
+}
+
+''';
+
+Future<bool> insertMuseo({String name, String description, Map diasHabiles,String horarioApertura, String horarioCierre, String imageURL, String ubicacion})async{
+  final MutationOptions options = MutationOptions(
+    documentNode: gql(insertM),
+    variables: <String, dynamic>{
+      "name": name,
+      "description": description,
+      "diasHabiles": diasHabiles,
+      "horarioApertura": horarioApertura,
+      "horarioCierre": horarioCierre,
+      "imageURL": imageURL,
+      "ubicacion": ubicacion
+    },
+  );
+
+  // ...
+
+  // ...
+
+  final QueryResult result = await _client.mutate(options);
+
+  if (result.hasException) {
+      print(result.exception.toString());
+      return false;
+  }
+
+  print(result.data);
+  return true;
+
+  // final bool isStarred =
+  //     result.data['insert_User']['returning'].length() > 0;
+
+  // if (isStarred) {
+  //   print('Thanks for your star!');
+  // }
+  //   return isStarred;
+
+  // ...
+}

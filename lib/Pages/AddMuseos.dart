@@ -1,15 +1,23 @@
 
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flushbar/flushbar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime_type/mime_type.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
+
+import 'package:museosapp/DB/GraphQl.dart';
+import 'package:museosapp/Providers/MuseoProvider.dart';
+import 'package:provider/provider.dart';
 
 class AddMuseos extends StatefulWidget {
   @override
@@ -28,6 +36,12 @@ class _AddMuseosState extends State<AddMuseos> {
   bool domingo = false;
   String horaApertura ;
   String horaCierre ;
+  MuseoProvider museo;
+  @override
+  void initState() {
+    museo = Provider.of<MuseoProvider>(context,listen: false);
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -39,11 +53,32 @@ class _AddMuseosState extends State<AddMuseos> {
             _labelDias(),
             _selectedHoraApertura(),
             _selectedHoraCierre(),
-            _cargarImagen()
+            _cargarImagen(),
+            _botonObtenerGeo(),
+            _cuerpoMapa(),
+            _botonEnviar()
           ],
         ),
       ),
     );
+  }
+
+  _cuerpoMapa(){
+    return Container(
+                    width: double.infinity,
+                    height: 200,
+                    child: GoogleMap(
+                      mapType: MapType.normal,
+                      markers: _markers,
+                      initialCameraPosition: kGooglePlex,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller.complete(controller);
+                        mapController = controller;
+                        
+                      },
+                      
+                    ),
+                  );
   }
 
   _labelNombre({TextEditingController controller,String descripcion, int minLines}){
@@ -367,5 +402,136 @@ class _AddMuseosState extends State<AddMuseos> {
             )..show(context);
     return respdata['secure_url'];
   }
+
+  ////////
+  Completer<GoogleMapController> _controller = Completer();
+  static final CameraPosition kGooglePlex = CameraPosition(
+    target: LatLng(-16.4825542, -68.1213619),
+    zoom: 14.4746,
+  );
+  
+  Future<void> _goToTheLake(_kLake,position) async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    _markers.add(
+            Marker(
+               markerId: MarkerId('Terminal'),
+               position: LatLng(position.latitude, position.longitude),
+            ));
+    setState(() {
+      
+    });
+    
+  }
+
+  GoogleMapController mapController;
+  Set<Marker> _markers = {};
+  Position position ;
+
+  _botonObtenerGeo(){
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+      width: double.infinity,
+      child: CupertinoButton(
+        onPressed: () async {
+          Flushbar(
+              title:  "Procesando",
+              message:  "Obteniendo el dato de la ubicacion..",
+              duration:  Duration(seconds: 3),              
+              backgroundColor: Colors.green,
+            )..show(context);
+          print("===== ");
+          // print(textController.text);
+          position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          print(position.toString());
+
+          CameraPosition kLake = CameraPosition(
+          // bearing: 192.8334901395799,
+          target: LatLng(position.latitude, position.longitude),
+          // tilt: 59.440717697143555,
+          zoom: 16);
+          _goToTheLake(kLake,position);
+           
+        },
+        child: Text("obtener ubicacion"),
+        color: Colors.green,
+      ),
+    );
+  }
+
+  /////
+   _botonEnviar(){
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 30),
+      child: CupertinoButton(
+        onPressed: () async {
+          Flushbar(
+                  title:  "Enviando datos a backend",
+                  message:  "Porfavor espera unos segundos mientras se completa la accion",
+                  duration:  Duration(seconds: 2),
+                  backgroundColor: Colors.orange,             
+                )..show(context);
+          print("===== ");
+          // print(textController.text);
+          // Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          // print(position);
+          bool state = await insertMuseo(
+            name: nameController.text,
+            description: descriptionController.text,
+            diasHabiles: {
+              "lun":lunes,
+              "mar":martes,
+              "mie":miercoles,
+              "jue":jueves,
+              "vie":viernes,
+              "sab":sabado,
+              "dom":domingo
+            },
+            horarioApertura: horaApertura,
+            horarioCierre: horaCierre,
+            imageURL: urlImage,
+            ubicacion: position.toString()
+          );// textController.text, position.toString()
+
+          if(state){
+            Flushbar(
+              title:  "Aceptado",
+              message:  "El dato fue completado exitosamente",
+              duration:  Duration(seconds: 3),              
+              backgroundColor: Colors.green,
+            )..show(context);
+            new Future.delayed(Duration(milliseconds: 3001),() {
+              nameController.clear();
+              descriptionController.clear();
+              lunes = false;
+              martes = false;
+              miercoles = false;
+              jueves = false;
+              viernes = false;
+              sabado = false;
+              domingo = false;
+              horaApertura = null;
+              horaCierre = null;
+              urlImage = "";
+              setState(() {
+                
+              });
+            });
+          }else{
+            Flushbar(
+              title:  "ERROR",
+              message:  "Sucedio un error por favor verifica tu conexion y que tu GPS este activado",
+              duration:  Duration(seconds: 3),              
+              backgroundColor: Colors.red,
+            )..show(context);
+          }
+          limpiarGrapql();
+        },
+        child: Text("Enviar"),
+        color: Colors.orange,
+      ),
+    );
+  }
+
 
 }
