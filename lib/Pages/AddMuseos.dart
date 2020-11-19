@@ -1,5 +1,15 @@
+
+
+import 'dart:io';
+
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:mime_type/mime_type.dart';
+import 'package:http_parser/http_parser.dart';
+import 'dart:convert';
 
 class AddMuseos extends StatefulWidget {
   @override
@@ -29,6 +39,7 @@ class _AddMuseosState extends State<AddMuseos> {
             _labelDias(),
             _selectedHoraApertura(),
             _selectedHoraCierre(),
+            _cargarImagen()
           ],
         ),
       ),
@@ -234,6 +245,127 @@ class _AddMuseosState extends State<AddMuseos> {
         ],
       ),
     );
+  }
+
+  ///////////////////
+  ///
+  _cargarImagen(){
+    return Column(
+      children: [
+        Text("Foto o logo del museo:"),
+                    SizedBox(height: 10,),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                getImage();
+                              },
+                              icon: Icon(Icons.add_a_photo),
+                              color: Colors.orange,
+                              iconSize: 50,
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                getImageGalery();
+                              },
+                              icon: Icon(Icons.image_search),
+                              color: Colors.orange,
+                              iconSize: 50,
+                            ),
+                          ],
+                        ),
+
+                        _image == null
+                        ? Container(
+                          color: Colors.grey,
+                            width: 200,
+                            height: 200,
+                            alignment: Alignment.center,
+                            child: Text("No seleccionaste ninguna imagen",textAlign: TextAlign.center,)
+                          )
+                        : Container(
+                          color: Colors.transparent,
+                            width: 200,
+                            height: 200,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.file(_image,fit: BoxFit.cover,))
+                          ),
+                      ],
+                    ),
+      ],
+    );
+  }
+  
+  File _image;
+  final picker = ImagePicker();
+  String urlImage = "Sin Imagen";
+
+  void cargarUrl()async{
+    urlImage = await subirImagen(_image);
+    print(urlImage);
+  }
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+        cargarUrl();
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+  Future getImageGalery() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+        cargarUrl();
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+  Future<String> subirImagen(File image)async{
+    final url = Uri.parse("https://api.cloudinary.com/v1_1/alemancilla/image/upload?upload_preset=hhavzkgi");
+    final mimeType = mime(image.path).split("/");
+    final uploadRequest = http.MultipartRequest(
+      'POST',
+      url
+    );
+
+    final file = await http.MultipartFile.fromPath(
+      "file", 
+      image.path,
+      contentType: MediaType(mimeType[0],mimeType[1])
+    );
+    uploadRequest.files.add(file);
+
+    final streamResponse = await uploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+
+    if(resp.statusCode != 200 && resp.statusCode != 201){
+      print("Algo salio mal ");
+      print(resp.body);
+      return null;
+    }
+    final respdata = json.decode(resp.body);
+    print(" === $respdata");
+    Flushbar(
+              title:  "LISTO",
+              message:  "Todo esta listo para enviar datos a backend",
+              duration:  Duration(seconds: 3),              
+              backgroundColor: Colors.purple,
+            )..show(context);
+    return respdata['secure_url'];
   }
 
 }
