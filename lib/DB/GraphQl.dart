@@ -219,3 +219,53 @@ Future<bool> insertMuseo({String name, String description, Map diasHabiles,Strin
 
   // ...
 }
+
+const String consultarMus = r'''
+  query ConsultarMuseo {
+  Museo {
+    name
+    imageURL
+    horarioApertura
+    horarioCierre
+    diasHabiles
+  }
+}
+
+
+
+''';
+
+Future<List> consultarMuseo()async{
+
+  // const int nRepositories = 50;
+
+  final QueryOptions options = QueryOptions(
+      documentNode: gql(consultarMus),
+      // variables: <String, dynamic>{
+      //   "email": email,
+      //   "pass": pass
+      // },
+  );
+  // ...
+
+  final QueryResult result = await _client.query(options);
+
+  if (result.hasException) {
+      // Flushbar(
+      //     title:  "Fallo inicio de sesion",
+      //     message:  result.exception.toString(),
+      //     backgroundColor: Colors.red,
+      //     duration:  Duration(seconds: 3),              
+      //   )..show(context);
+      print(result.exception.toString());
+  }
+  print("#########################");
+  print(result.data);
+  // return true;
+  final List repositories =
+      result.data['Museo'];
+
+
+  return repositories;
+  // ...
+}
