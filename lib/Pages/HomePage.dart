@@ -58,7 +58,28 @@ class _HomePageState extends State<HomePage> {
 
   _returnPage(MuseoProvider museo){
     if(museo.page == "home"){
-      return ListMuseos();
+      return Container(
+        padding: EdgeInsets.all(10),
+        color: Colors.orange,
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.asset("assets/images/descarga.png",fit: BoxFit.cover,height: 100,width: 100,)),
+              Text("Museos", style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  child: ListMuseos()
+                ),
+              ),
+            ],
+          )
+        );
     }else if(museo.page == "addMuseo"){
       return AddMuseos();
     }
