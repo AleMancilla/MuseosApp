@@ -1,6 +1,4 @@
 // ...
-
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql/client.dart';
@@ -10,11 +8,14 @@ final HttpLink _httpLink = HttpLink(
     headers: {
       "content-type":"application/json",
       "x-hasura-admin-secret":"AleAdminMuseosApp"
-    }
+    },
+);
+final AuthLink _authLink = AuthLink(
+    getToken: () async => 'Bearer AleAdminMuseosApp',
 );
 
+final Link _link = _authLink.concat(_httpLink);
 
-final Link _link = _httpLink;
 
 final GraphQLClient _client = GraphQLClient(
         cache: InMemoryCache(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/BienvenidaPage.dart';
+import 'package:museosapp/Widgets/ButtomBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,17 +26,26 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          child: Text("BIENVENIDO"),
+          child: Column(
+            children: [
+              Expanded(child: Text("BIENVENIDO")),
+              Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: ButtomBar(),
+              )
+            ],
+          ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          label: Text("cerrar session"),
-          onPressed: (){
-            myPrefs.setString("email", null);
-            myPrefs.setString("pass", null);
-            limpiarGrapql();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BienvenidaPage()));
-          },
-        ),
+        // floatingActionButton: FloatingActionButton.extended(
+        //   label: Text("cerrar session"),
+        //   onPressed: (){
+        //     myPrefs.setString("email", null);
+        //     myPrefs.setString("pass", null);
+        //     limpiarGrapql();
+        //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BienvenidaPage()));
+        //   },
+        // ),
       ),
     );
   }

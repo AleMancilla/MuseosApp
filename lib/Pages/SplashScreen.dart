@@ -28,7 +28,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
   Widget build(BuildContext context) {
     return AnimatedSplashScreen.withScreenFunction(
       splash: 'assets/images/descarga.png',
-      duration: 2500,
+      duration: 2000,
       screenFunction: _comprobandoPage,
       splashTransition: SplashTransition.rotationTransition,
       pageTransitionType: PageTransitionType.scale,
@@ -54,6 +54,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
                       backgroundColor: Colors.red,
                       duration:  Duration(seconds: 3),              
                     )..show(context);
+                    return BienvenidaPage();
           }else{
             Flushbar(
                       title:  "Sesion iniciada",
