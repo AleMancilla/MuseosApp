@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql/client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final HttpLink _httpLink = HttpLink(
     uri: 'https://museosapp.herokuapp.com/v1/graphql',
@@ -117,6 +118,8 @@ const String login = r'''
   User(where: {email: {_eq: $email}, pass: {_eq: $pass}}) {
     name
     phone
+    email
+    pass
   }
 }
 
@@ -152,7 +155,10 @@ Future<List> iniciandoSesion({@required String email, @required String pass})asy
   // return true;
   final List repositories =
       result.data['User'];
-
+  SharedPreferences myPrefs = await SharedPreferences.getInstance();
+  myPrefs.setString("email", result.data['User'][0]["email"]);
+  myPrefs.setString("pass", result.data['User'][0]["pass"]);
+  myPrefs.setString("name", result.data['User'][0]["name"]);
 
   return repositories;
   // ...
@@ -223,11 +229,16 @@ Future<bool> insertMuseo({String name, String description, Map diasHabiles,Strin
 const String consultarMus = r'''
   query ConsultarMuseo {
   Museo {
+    idMuseo
     name
     imageURL
     horarioApertura
     horarioCierre
     diasHabiles
+    ubicacion
+    description
+    priceNational
+    priceExtrangero
   }
 }
 

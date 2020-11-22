@@ -149,6 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 myPrefs.setString("email", _email.text);
                 myPrefs.setString("pass", _pass.text);
+                myPrefs.setString("name", _name.text);
                 
                 _email.clear();
                 _name.clear();

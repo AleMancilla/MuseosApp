@@ -44,21 +44,28 @@ class _AddMuseosState extends State<AddMuseos> {
   }
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        child: Column(
-          children: [
-            _labelNombre(controller: nameController, descripcion: "Nombre del museo",minLines: 1),
-            _labelNombre(controller: descriptionController, descripcion: "Datos del Museo",minLines: 10),
-            _labelDias(),
-            _selectedHoraApertura(),
-            _selectedHoraCierre(),
-            _cargarImagen(),
-            _botonObtenerGeo(),
-            _cuerpoMapa(),
-            _botonEnviar()
-          ],
-        ),
+    return Container(
+      child: Column(
+        children: [
+          _botonObtenerGeo(),
+          _cuerpoMapa(),
+          Expanded(
+            // height: 200,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                    _labelNombre(controller: nameController, descripcion: "Nombre del museo",minLines: 1),
+                    _labelNombre(controller: descriptionController, descripcion: "Datos del Museo",minLines: 10),
+                    _labelDias(),
+                    _selectedHoraApertura(),
+                    _selectedHoraCierre(),
+                    _cargarImagen(),
+                    _botonEnviar()
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -66,7 +73,7 @@ class _AddMuseosState extends State<AddMuseos> {
   _cuerpoMapa(){
     return Container(
                     width: double.infinity,
-                    height: 200,
+                    height: 150,
                     child: GoogleMap(
                       mapType: MapType.normal,
                       markers: _markers,
@@ -117,7 +124,7 @@ class _AddMuseosState extends State<AddMuseos> {
                               print('change $date');
                             }, 
                             onConfirm: (date) {
-                              horaCierre = "${date.hour.remainder(24).toString().padLeft(2, '0')}:${date.minute.remainder(60).toString().padLeft(2, '0')}" ;
+                              horaApertura = "${date.hour.remainder(24).toString().padLeft(2, '0')}:${date.minute.remainder(60).toString().padLeft(2, '0')}" ;
                               setState(() {
                                 
                               });
@@ -126,7 +133,7 @@ class _AddMuseosState extends State<AddMuseos> {
                           );
                         },
                       label: Text(
-                          (horaCierre != null)?"Hora de apertura: $horaCierre":"Selecciona la hora de apertura",
+                          (horaApertura != null)?"Hora de apertura: $horaApertura":"Selecciona la hora de apertura",
                           style: TextStyle(color: Colors.white),
                       )
                     ),
@@ -145,7 +152,7 @@ class _AddMuseosState extends State<AddMuseos> {
                               print('change $date');
                             }, 
                             onConfirm: (date) {
-                              horaApertura = "${date.hour.remainder(24).toString().padLeft(2, '0')}:${date.minute.remainder(60).toString().padLeft(2, '0')}" ;
+                              horaCierre = "${date.hour.remainder(24).toString().padLeft(2, '0')}:${date.minute.remainder(60).toString().padLeft(2, '0')}" ;
                               setState(() {
                                 
                               });
@@ -154,7 +161,7 @@ class _AddMuseosState extends State<AddMuseos> {
                           );
                         },
                       label: Text(
-                          (horaApertura != null)?"Hora de cierre: $horaApertura":"Selecciona la hora de cierre",
+                          (horaCierre != null)?"Hora de cierre: $horaCierre":"Selecciona la hora de cierre",
                           style: TextStyle(color: Colors.white),
                       )
                     ),
@@ -409,28 +416,38 @@ class _AddMuseosState extends State<AddMuseos> {
     target: LatLng(-16.4825542, -68.1213619),
     zoom: 14.4746,
   );
-  
-  Future<void> _goToTheLake(_kLake,position) async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
-    _markers.add(
-            Marker(
-               markerId: MarkerId('Terminal'),
-               position: LatLng(position.latitude, position.longitude),
-            ));
-    setState(() {
-      
-    });
-    
-  }
 
   GoogleMapController mapController;
   Set<Marker> _markers = {};
   Position position ;
+  List<double> coord = [0,0];
+  Future<void> _goToTheLake(_kLake,position) async {
+    _markers={};
+     final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    _markers.add(
+            Marker(
+              draggable: true,
+               markerId: MarkerId('Terminal'),
+               position: LatLng(position.latitude, position.longitude),
+               onDragEnd: (newPosition) {
+                  coord[0]=newPosition.latitude;
+                  coord[1]=newPosition.longitude;
+                  print(coord[0]);
+                  print(coord[1]);
+               },
+            ));
+    setState(() {
+      
+    });
+
+    
+  }
 
   _botonObtenerGeo(){
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+      padding: EdgeInsets.symmetric(vertical: 10),
+      alignment: Alignment.center,
       width: double.infinity,
       child: CupertinoButton(
         onPressed: () async {
@@ -441,19 +458,21 @@ class _AddMuseosState extends State<AddMuseos> {
               backgroundColor: Colors.green,
             )..show(context);
           print("===== ");
-          // print(textController.text);
           position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
           print(position.toString());
-
+          coord[0] = position.latitude;
+          coord[1] = position.longitude;
           CameraPosition kLake = CameraPosition(
           // bearing: 192.8334901395799,
           target: LatLng(position.latitude, position.longitude),
+          
           // tilt: 59.440717697143555,
           zoom: 16);
+
           _goToTheLake(kLake,position);
            
         },
-        child: Text("obtener ubicacion"),
+        child: Text("obtener ubicacion de museo"),
         color: Colors.green,
       ),
     );
@@ -490,7 +509,7 @@ class _AddMuseosState extends State<AddMuseos> {
             horarioApertura: horaApertura,
             horarioCierre: horaCierre,
             imageURL: urlImage,
-            ubicacion: position.toString()
+            ubicacion: "${coord[0]}, ${coord[1]}"
           );// textController.text, position.toString()
 
           if(state){
@@ -512,6 +531,7 @@ class _AddMuseosState extends State<AddMuseos> {
               domingo = false;
               horaApertura = null;
               horaCierre = null;
+              coord = [0,0];
               urlImage = "";
               setState(() {
                 

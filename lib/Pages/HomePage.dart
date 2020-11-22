@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
               Text("Museos", style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20)

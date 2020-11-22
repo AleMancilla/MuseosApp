@@ -64,8 +64,8 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
                     )..show(context);
                     return HomePage();
           }
-        print(usuario[0]["name"]);
-        print(usuario[0]["phone"]);
+        // print(usuario[0]["name"]);
+        // print(usuario[0]["phone"]);
       }
     }
     print(state);
