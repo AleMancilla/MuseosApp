@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:museosapp/Pages/AlertDialogCompra.dart';
 import 'package:museosapp/Pages/ListMuseos.dart';
 class MuseoPage extends StatelessWidget {
   final MuseoItem museo;
   
   const MuseoPage({@required this.museo});
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,10 @@ class MuseoPage extends StatelessWidget {
       child: Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: null, 
+          onPressed: (){
+            print("object");
+            showAlertDialog(context,this.museo.priceNac,this.museo.priceExt);
+          }, 
           label: Text("COMPRAR ENTRADAS"),
           backgroundColor: Colors.orange,
         ),
@@ -142,6 +148,24 @@ class MuseoPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+    // show the dialog
+  showAlertDialog(BuildContext context,double nacional, double extrangero) {
+    // // set up the button
+    // Widget okButton = FlatButton(
+    //   child: Text("OK"),
+    //   onPressed: () { },
+    // );
+    // set up the AlertDialog
+    Widget alert = AlertDialogCompra(nacional: nacional,extrangero: extrangero,);
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
