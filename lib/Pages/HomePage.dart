@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/AddMuseos.dart';
@@ -81,7 +83,38 @@ class _HomePageState extends State<HomePage> {
           )
         );
     }else if(museo.page == "addMuseo"){
-      return AddMuseos();
+      // _cargandoPage();
+      _cargandoPage();
+      return pagina;
+      // return AddMuseos();
     }
+  }
+  Widget pagina = CircularProgressIndicator();
+  bool aux = true;
+  _cargandoPage()async {
+    bool stado = await consultarEditor(myPrefs.getString("email"));
+    print("object ${myPrefs.getString("email")} _____ $stado");
+    if (stado) {
+      pagina =  AddMuseos();
+    }else{
+      pagina = Container(
+        width: double.infinity,
+        height: 250,
+        padding: EdgeInsets.all(30),
+        child: Text("NO TIENES PERMISOS DE ADMINISTRADOR",style: TextStyle(fontSize: 30,color: Colors.grey),),
+      );
+    }
+    if (aux) {
+      aux = false;
+      setState(() {
+        
+      });
+    }
+    // return stado? AddMuseos():Container(
+    //   width: double.infinity,
+    //   height: 250,
+    //   padding: EdgeInsets.all(30),
+    //   child: Text("NO TIENES PERMISOS DE ADMINISTRADOR",style: TextStyle(fontSize: 40,color: Colors.grey),),
+    // );
   }
 }

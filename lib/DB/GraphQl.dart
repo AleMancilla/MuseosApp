@@ -280,3 +280,48 @@ Future<List> consultarMuseo()async{
   return repositories;
   // ...
 }
+
+
+const String consultarEdit= r'''
+  query editor($email: String = "$email") {
+  User(where: {email: {_eq: $email}}) {
+    email
+    editor
+  }
+}
+
+''';
+
+Future<bool> consultarEditor(String email)async{
+
+  // const int nRepositories = 50;
+
+  final QueryOptions options = QueryOptions(
+      documentNode: gql(consultarEdit),
+      variables: <String, dynamic>{
+        "email": email
+      },
+  );
+  // ...
+
+  final QueryResult result = await _client.query(options);
+
+  if (result.hasException) {
+      // Flushbar(
+      //     title:  "Fallo inicio de sesion",
+      //     message:  result.exception.toString(),
+      //     backgroundColor: Colors.red,
+      //     duration:  Duration(seconds: 3),              
+      //   )..show(context);
+      print(result.exception.toString());
+  }
+  print("#########################");
+  print(result.data);
+  // return true;
+  final bool resp =
+      result.data['User'][0]["editor"];
+
+
+  return resp;
+  // ...
+}
