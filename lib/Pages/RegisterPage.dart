@@ -16,17 +16,6 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _confirmpass = new TextEditingController();
   TextEditingController _name = new TextEditingController();
   TextEditingController _number = new TextEditingController();
-  SharedPreferences myPrefs;
-
-  @override
-  void initState() {
-    cargando();
-    super.initState();
-  }
-
-  cargando()async{
-    myPrefs = await SharedPreferences.getInstance();
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,10 +135,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   backgroundColor: Colors.green,
                   duration:  Duration(seconds: 3),              
                 )..show(context);
-
-                myPrefs.setString("email", _email.text);
-                myPrefs.setString("pass", _pass.text);
-                myPrefs.setString("name", _name.text);
                 
                 _email.clear();
                 _name.clear();

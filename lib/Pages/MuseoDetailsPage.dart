@@ -2,14 +2,135 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:like_button/like_button.dart';
+import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/AlertDialogCompra.dart';
 import 'package:museosapp/Pages/ListMuseos.dart';
-class MuseoPage extends StatelessWidget {
+import 'package:shared_preferences/shared_preferences.dart';
+class MuseoPage extends StatefulWidget {
   final MuseoItem museo;
   
   const MuseoPage({@required this.museo});
 
+  @override
+  _MuseoPageState createState() => _MuseoPageState();
+}
+
+class _MuseoPageState extends State<MuseoPage> {
+
+  SharedPreferences myPrefs;
+  @override
+  void initState() { 
+    super.initState();
+    _cargandoDatos();
+    // WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // WidgetsBinding.instance.removeObserver(this);
+    print(" ### BACKdispose ###");
+    // limpiarGrapql();
+    super.dispose();
+  }
+
+  //-------------------------Function That Triggers when you hit the back key
+  // bool isBackButtonActivated = false;
+  // @override
+  // didPopRoute(){
+
+  //   print(" ### BACK ###");
+  //   bool override;
+  //   if(isBackButtonActivated)
+  //     override = false;
+  //   else
+  //     override = true;
+  //   return new Future<bool>.value(override);
+  // }
+
   
+  List lista = [];
+  _cargandoDatos()async{
+    myPrefs = await SharedPreferences.getInstance();
+    lista = await consultarLike(
+      idUser: myPrefs.getString("idUser"),
+      idMuseo: this.widget.museo.id
+    );
+
+    if(lista.length>0){
+      setState(() {
+        
+      });
+    }
+
+    print("""
+    lista => $lista ==> ${this.widget.museo.id} ==> ${myPrefs.getString("idUser")}
+    """);
+  }
+  
+  _likeButton(String idMuseo, bool status){
+    bool isLikedOFICIAL = status;
+    return LikeButton(
+      isLiked: isLikedOFICIAL,
+      size: 30,
+      circleColor:
+          CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+      bubblesColor: BubblesColor(
+        dotPrimaryColor: Color(0xff33b5e5),
+        dotSecondaryColor: Color(0xff0099cc),
+      ),
+      likeBuilder: (bool isLiked) {
+        return Icon(
+          Icons.favorite,
+          color: isLiked ? Colors.red : Colors.grey,
+          size: 30,
+        );
+      },
+      // likeCount: 665,
+      onTap: (isLiked) {
+        return onLikeButtonTapped(isLiked,idMuseo);
+      },
+      countBuilder: (int count, bool isLiked, String text) {
+        var color = isLiked ? Colors.red : Colors.grey;
+        Widget result;
+        if (count == 0) {
+          result = Text(
+            "love",
+            style: TextStyle(color: color),
+          );
+        } else
+          result = Text(
+            text,
+            style: TextStyle(color: color),
+          );
+        return result;
+      },
+    );
+  }
+
+  Future<bool> onLikeButtonTapped(bool isLiked, String idMuseo) async{
+    /// send your request here
+    // final bool success= await sendRequest();
+
+    /// if failed, you can do nothing
+    // return success? !isLiked:isLiked;
+
+    if(!isLiked){
+      insertLike(
+        idUser: myPrefs.getString("idUser"),
+        idMuseo: this.widget.museo.id
+      );
+    }else{
+      deleteLike(
+        idUser: myPrefs.getString("idUser"),
+        idMuseo: this.widget.museo.id
+      );
+    }
+
+    print(" ###### line ${!isLiked} ad $idMuseo");
+
+    return !isLiked;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +139,7 @@ class MuseoPage extends StatelessWidget {
 
     List<double> coord = [0,0];
     List<String> coord2 = ["",""];
-    coord2 = this.museo.ubicacion.split(",");
+    coord2 = this.widget.museo.ubicacion.split(",");
     coord[0] = double.parse(coord2[0]); 
     coord[1] = double.parse(coord2[1]); 
      Completer<GoogleMapController> _controller = Completer();
@@ -42,7 +163,7 @@ class MuseoPage extends StatelessWidget {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: (){
             print("object");
-            showAlertDialog(context,this.museo.priceNac,this.museo.priceExt);
+            showAlertDialog(context,this.widget.museo.priceNac,this.widget.museo.priceExt);
           }, 
           label: Text("COMPRAR ENTRADAS"),
           backgroundColor: Colors.orange,
@@ -55,7 +176,7 @@ class MuseoPage extends StatelessWidget {
                   
                   FadeInImage(
                     placeholder: AssetImage("assets/images/loading.gif"), 
-                    image: NetworkImage(this.museo.url),
+                    image: NetworkImage(this.widget.museo.url),
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: size.height*0.3,
@@ -72,11 +193,19 @@ class MuseoPage extends StatelessWidget {
                       width: size.width,
                       padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
                       color: Colors.blueGrey[900].withOpacity(0.6),
-                      child: Text(this.museo.name,style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold
-                      ),),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(this.widget.museo.name,style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold
+                              ),
+                            ),
+                          ),
+                          _likeButton(this.widget.museo.id, lista.length>0)
+                        ],
+                      ),
                     ),
                   )
                 ],
@@ -92,7 +221,7 @@ class MuseoPage extends StatelessWidget {
                         text: TextSpan(
                           children: <TextSpan>[
                             TextSpan(text: 'Abren a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
-                            TextSpan(text: '     ${this.museo.horarioA}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18,)),
+                            TextSpan(text: '     ${this.widget.museo.horarioA}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18,)),
                           ],
                         ),
                       ),
@@ -102,7 +231,7 @@ class MuseoPage extends StatelessWidget {
                         text: TextSpan(
                           children: <TextSpan>[
                             TextSpan(text: 'Cierran a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
-                            TextSpan(text: '      ${this.museo.horarioC}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18)),
+                            TextSpan(text: '      ${this.widget.museo.horarioC}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18)),
                           ],
                         ),
                       ),
@@ -130,15 +259,15 @@ class MuseoPage extends StatelessWidget {
 
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 40,vertical: 20),
-                child: Text(this.museo.descripcion,style: TextStyle(),textAlign: TextAlign.justify,),
+                child: Text(this.widget.museo.descripcion,style: TextStyle(),textAlign: TextAlign.justify,),
               ),
 
               Text("PRECIOS:",textAlign: TextAlign.center,style: TextStyle(fontSize: 20, ),),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _btnPrecio("${this.museo.priceNac}","Nacional"),
-                  _btnPrecio("${this.museo.priceExt}","Extrangero"),
+                  _btnPrecio("${this.widget.museo.priceNac}","Nacional"),
+                  _btnPrecio("${this.widget.museo.priceExt}","Extrangero"),
                 ],
               ),
               SizedBox(
@@ -151,7 +280,6 @@ class MuseoPage extends StatelessWidget {
     );
   }
 
-    // show the dialog
   showAlertDialog(BuildContext context,double nacional, double extrangero) {
     // // set up the button
     // Widget okButton = FlatButton(

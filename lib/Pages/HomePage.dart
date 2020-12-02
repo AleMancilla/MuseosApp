@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       pagina = Container(
         width: double.infinity,
         height: 250,
-        padding: EdgeInsets.all(30),
+        padding: EdgeInsets.all(30),    
         child: Text("NO TIENES PERMISOS DE ADMINISTRADOR",style: TextStyle(fontSize: 30,color: Colors.grey),),
       );
     }

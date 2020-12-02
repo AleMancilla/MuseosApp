@@ -54,6 +54,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
                       backgroundColor: Colors.red,
                       duration:  Duration(seconds: 3),              
                     )..show(context);
+                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BienvenidaPage()));
                     return BienvenidaPage();
           }else{
             Flushbar(
@@ -62,6 +63,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
                       backgroundColor: Colors.green,
                       duration:  Duration(seconds: 3),              
                     )..show(context);
+                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
                     return HomePage();
           }
         // print(usuario[0]["name"]);
