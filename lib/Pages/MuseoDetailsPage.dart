@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:like_button/like_button.dart';
 import 'package:museosapp/DB/GraphQl.dart';
@@ -37,6 +38,7 @@ class _MuseoPageState extends State<MuseoPage> {
   }
   List<ComentariosUser> listaComentarios ;
   List<ComentarioMuseo> comentariosMuseo ;
+  String direccion = "";
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -51,6 +53,23 @@ class _MuseoPageState extends State<MuseoPage> {
     setState(() {
       
     });
+
+    List<double> coord = [0,0];
+    List<String> coord2 = ["",""];
+    coord2 = this.widget.museo.ubicacion.split(",");
+    coord[0] = double.parse(coord2[0]); 
+    coord[1] = double.parse(coord2[1]); 
+
+    List<Placemark> placemarks = await placemarkFromCoordinates(coord[0], coord[1]);
+    direccion = placemarks[0].locality +", "+ placemarks[0].street ;
+    print("""
+    ----------------
+
+    $placemarks
+
+    ----------------
+    """);
+
   }
 
   //-------------------------Function That Triggers when you hit the back key
@@ -278,6 +297,11 @@ class _MuseoPageState extends State<MuseoPage> {
                   ],
                 ),
 
+                //direccion
+                Container(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Text("Direccion: $direccion",style: TextStyle(),textAlign: TextAlign.justify,),
+                ),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 40,vertical: 20),
                   child: Text(this.widget.museo.descripcion,style: TextStyle(),textAlign: TextAlign.justify,),
