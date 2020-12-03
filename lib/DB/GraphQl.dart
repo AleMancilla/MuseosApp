@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql/client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 final HttpLink _httpLink = HttpLink(
     uri: 'https://museosapp.herokuapp.com/v1/graphql',
@@ -475,4 +476,152 @@ Future<bool> deleteLike({String idUser, String idMuseo})async{
   //   return isStarred;
 
   // ...
+}
+
+
+
+/////////////////
+const String insertComent = r'''
+mutation insertComentario($idMuseo: uuid = "", $idUser: uuid = "", $Comentario: String = "", $autor: String = "") {
+  insert_ComentariosUser(objects: {idMuseo: $idMuseo, idUser: $idUser, Comentario: $Comentario, autor: $autor}) {
+    returning {
+      Comentario
+      autor
+    }
+  }
+}
+''';
+
+Future<bool> insertComentario({String idUser, String idMuseo,String comentario, String autor})async{
+  final MutationOptions options = MutationOptions(
+    documentNode: gql(insertComent),
+    variables: <String, dynamic>{
+      "idUser": idUser,
+      "idMuseo": idMuseo,
+      "Comentario": comentario,
+      "autor": autor
+    },
+  );
+
+  // ...
+
+  // ...
+
+  final QueryResult result = await _client.mutate(options);
+
+  if (result.hasException) {
+      print(result.exception.toString());
+      return false;
+  }
+
+  print(result.data);
+  return true;
+
+  // final bool isStarred =
+  //     result.data['insert_User']['returning'].length() > 0;
+
+  // if (isStarred) {
+  //   print('Thanks for your star!');
+  // }
+  //   return isStarred;
+
+  // ...
+}
+
+
+const String readComent= r'''
+query readComentario($idMuseo: uuid = "") {
+  ComentariosUser(where: {idMuseo: {_eq: $idMuseo}}) {
+    autor
+    Comentario
+    fecha
+  }
+}
+''';
+
+Future<List<ComentariosUser>> readComentario(String idMuseo)async{
+
+  // const int nRepositories = 50;
+
+  final QueryOptions options = QueryOptions(
+      documentNode: gql(readComent),
+      variables: <String, dynamic>{
+        "idMuseo": idMuseo
+      },
+  );
+  // ...
+
+  final QueryResult result = await _client.query(options);
+
+  if (result.hasException) {
+      // Flushbar(
+      //     title:  "Fallo inicio de sesion",
+      //     message:  result.exception.toString(),
+      //     backgroundColor: Colors.red,
+      //     duration:  Duration(seconds: 3),              
+      //   )..show(context);
+      print(result.exception.toString());
+  }
+  print("#########################");
+  print(result.data);
+  // return true;
+  final ModelComentario resp = ModelComentario.fromJson(result.data) ;
+
+
+  return resp.comentariosUser;
+  // ...
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////
+///
+///
+///
+ModelComentario modelComentarioFromJson(String str) => ModelComentario.fromJson(json.decode(str));
+
+String modelComentarioToJson(ModelComentario data) => json.encode(data.toJson());
+
+class ModelComentario {
+    ModelComentario({
+        this.comentariosUser,
+    });
+
+    List<ComentariosUser> comentariosUser;
+
+    factory ModelComentario.fromJson(Map<String, dynamic> json) => ModelComentario(
+        comentariosUser: List<ComentariosUser>.from(json["ComentariosUser"].map((x) => ComentariosUser.fromJson(x))),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "ComentariosUser": List<dynamic>.from(comentariosUser.map((x) => x.toJson())),
+    };
+}
+
+class ComentariosUser {
+    ComentariosUser({
+        this.autor,
+        this.comentario,
+        this.fecha,
+    });
+
+    String autor;
+    String comentario;
+    DateTime fecha;
+
+    factory ComentariosUser.fromJson(Map<String, dynamic> json) => ComentariosUser(
+        autor: json["autor"],
+        comentario: json["Comentario"],
+        fecha: DateTime.parse(json["fecha"]),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "autor": autor,
+        "Comentario": comentario,
+        "fecha": "${fecha.year.toString().padLeft(4, '0')}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}",
+    };
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:like_button/like_button.dart';
@@ -31,7 +32,25 @@ class _MuseoPageState extends State<MuseoPage> {
     // WidgetsBinding.instance.removeObserver(this);
     print(" ### BACKdispose ###");
     // limpiarGrapql();
+    _controllerComentario.dispose();
     super.dispose();
+  }
+  List<ComentariosUser> listaComentarios ;
+  List<ComentarioMuseo> comentariosMuseo ;
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    listaComentarios = await readComentario(this.widget.museo.id);
+    comentariosMuseo = listaComentarios.map((e) {
+      return ComentarioMuseo(
+        usuario: e.autor, 
+        comentario: e.comentario, 
+        fecha: e.fecha.toString()
+      );
+    }).toList();
+    setState(() {
+      
+    });
   }
 
   //-------------------------Function That Triggers when you hit the back key
@@ -158,124 +177,229 @@ class _MuseoPageState extends State<MuseoPage> {
 
 
     return SafeArea(
-      child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: (){
-            print("object");
-            showAlertDialog(context,this.widget.museo.priceNac,this.widget.museo.priceExt);
-          }, 
-          label: Text("COMPRAR ENTRADAS"),
-          backgroundColor: Colors.orange,
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  
-                  FadeInImage(
-                    placeholder: AssetImage("assets/images/loading.gif"), 
-                    image: NetworkImage(this.widget.museo.url),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: size.height*0.3,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          // floatingActionButton: FloatingActionButton.extended(
+          //   onPressed: (){
+          //     print("object");
+          //     showAlertDialog(context,this.widget.museo.priceNac,this.widget.museo.priceExt);
+          //   }, 
+          //   label: Text("COMPRAR ENTRADAS"),
+          //   backgroundColor: Colors.orange,
+          // ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                Stack(
+                  children: [
                     
-                  ),
-                  // Container(
-                  //   width: double.infinity,
-                  //   height: size.height*0.3,
-                  //   color: Colors.blueGrey[900].withOpacity(0.5),
-                  // ),
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      width: size.width,
-                      padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
-                      color: Colors.blueGrey[900].withOpacity(0.6),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(this.widget.museo.name,style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold
+                    FadeInImage(
+                      placeholder: AssetImage("assets/images/loading.gif"), 
+                      image: NetworkImage(this.widget.museo.url),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: size.height*0.3,
+                      
+                    ),
+                    // Container(
+                    //   width: double.infinity,
+                    //   height: size.height*0.3,
+                    //   color: Colors.blueGrey[900].withOpacity(0.5),
+                    // ),
+                    Positioned(
+                      bottom: 0,
+                      child: Container(
+                        width: size.width,
+                        padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+                        color: Colors.blueGrey[900].withOpacity(0.6),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(this.widget.museo.name,style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
+                                ),
                               ),
                             ),
-                          ),
-                          _likeButton(this.widget.museo.id, lista.length>0)
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(text: 'Abren a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
-                            TextSpan(text: '     ${this.widget.museo.horarioA}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18,)),
+                            _likeButton(this.widget.museo.id, lista.length>0)
                           ],
                         ),
-                      ),
-
-
-                      RichText(
-                        text: TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(text: 'Cierran a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
-                            TextSpan(text: '      ${this.widget.museo.horarioC}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18)),
-                          ],
-                        ),
-                      ),
-
-                    ],
-                  ),
-
-                  Container(
-                      width: size.width*0.5,
-                      height: size.width*0.5,
-                      child: GoogleMap(
-                        mapType: MapType.normal,
-                        markers: _markers,
-                        initialCameraPosition: kGooglePlex,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller.complete(controller);
-                          mapController = controller;
-                          
-                        },
-                        
                       ),
                     )
-                ],
-              ),
+                  ],
+                ),
 
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 40,vertical: 20),
-                child: Text(this.widget.museo.descripcion,style: TextStyle(),textAlign: TextAlign.justify,),
-              ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(text: 'Abren a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
+                              TextSpan(text: '     ${this.widget.museo.horarioA}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18,)),
+                            ],
+                          ),
+                        ),
 
-              Text("PRECIOS:",textAlign: TextAlign.center,style: TextStyle(fontSize: 20, ),),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _btnPrecio("${this.widget.museo.priceNac}","Nacional"),
-                  _btnPrecio("${this.widget.museo.priceExt}","Extrangero"),
-                ],
+
+                        RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(text: 'Cierran a las:\n', style: TextStyle(fontWeight: FontWeight.bold,color: textoColor,fontSize: 18)),
+                              TextSpan(text: '      ${this.widget.museo.horarioC}', style: TextStyle(fontWeight: FontWeight.normal,color: textoColor,fontSize: 18)),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    ),
+
+                    Container(
+                        width: size.width*0.5,
+                        height: size.width*0.5,
+                        child: GoogleMap(
+                          mapType: MapType.normal,
+                          markers: _markers,
+                          initialCameraPosition: kGooglePlex,
+                          onMapCreated: (GoogleMapController controller) {
+                            _controller.complete(controller);
+                            mapController = controller;
+                            
+                          },
+                          
+                        ),
+                      )
+                  ],
+                ),
+
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 40,vertical: 20),
+                  child: Text(this.widget.museo.descripcion,style: TextStyle(),textAlign: TextAlign.justify,),
+                ),
+
+                Text("PRECIOS:",textAlign: TextAlign.center,style: TextStyle(fontSize: 20, ),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _btnPrecio("${this.widget.museo.priceNac}","Nacional"),
+                    _btnPrecio("${this.widget.museo.priceExt}","Extrangero"),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                FloatingActionButton.extended(
+                  onPressed: (){
+                    print("object");
+                    showAlertDialog(context,this.widget.museo.priceNac,this.widget.museo.priceExt);
+                  }, 
+                  label: Text("COMPRAR ENTRADAS"),
+                  backgroundColor: Colors.orange,
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                
+                _listaComentarios(context)
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  TextEditingController _controllerComentario = new TextEditingController();
+  
+  _listaComentarios(BuildContext context){
+    String email ="";
+    List aux;
+
+    if(myPrefs!=null){
+      email  = myPrefs.getString("email");
+      aux = email.split("@");
+      email = aux[0];
+    }
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 20),
+      color: Colors.orange.withOpacity(0.1),
+      child: Column(
+        children: [
+          Text("COMENTARIOS:",textAlign: TextAlign.center,style: TextStyle(fontSize: 20, ),),
+          if(comentariosMuseo!=null) ...comentariosMuseo,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 35,vertical: 15),
+            child: TextFormField(
+              controller: _controllerComentario,
+              decoration: InputDecoration(
+                labelText: "Comentario",
+                border: OutlineInputBorder(),
+                
               ),
-              SizedBox(
-                height: 60,
+              maxLines: 5,
+              minLines: 2,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text("Usuario: $email@******** ",textAlign: TextAlign.center,style: TextStyle(fontSize: 14, ),),
+              GestureDetector(
+                onTap: () async {
+                  bool stado = await  insertComentario(
+                    idUser: myPrefs.getString("idUser"),
+                    idMuseo: this.widget.museo.id,
+                    autor: email,
+                    comentario: _controllerComentario.text
+                  );
+
+                  if(stado){
+                    Flushbar(
+                        title:  "Aceptado",
+                        message:  "Su comentario fue aceptado correctamente",
+                        backgroundColor: Colors.green,
+                        duration:  Duration(seconds: 3),              
+                      )..show(context);
+                      ComentarioMuseo item = new ComentarioMuseo(
+                        usuario: email,
+                        comentario: _controllerComentario.text,
+                        fecha: DateTime.now().toString(),
+                      );
+                      comentariosMuseo.add(item);
+                      Future.delayed(Duration(microseconds: 3001),(){
+                        setState(() {
+                          
+                        });
+                      });
+                  }else{
+                    Flushbar(
+                        title:  "Error",
+                        message:  "Hubo un error en su publicacion de comentario.",
+                        backgroundColor: Colors.red,
+                        duration:  Duration(seconds: 3),              
+                      )..show(context);
+                  }
+                  _controllerComentario.clear();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.orange,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                  child: Text("Comentar", style: TextStyle(color: Colors.white,)),
+                ),
               )
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -309,6 +433,41 @@ class _MuseoPageState extends State<MuseoPage> {
         children: [
           Text(tipo, style: TextStyle(color: Colors.white),textAlign: TextAlign.center,),
           Text("$data Bs", style: TextStyle(color: Colors.white),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+}
+
+
+class ComentarioMuseo extends StatelessWidget {
+  final String usuario;
+  final String comentario;
+  final String fecha;
+
+  const ComentarioMuseo({@required this.usuario,@required this.comentario,@required this.fecha}) ;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(horizontal: 25,vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(5)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("${this.usuario}****",style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold),),
+          Text(this.comentario),
+          Row(
+            children: [
+              Expanded(child: Container()),
+              Text(this.fecha.substring(0,10),style: TextStyle(color: Colors.grey[400],fontWeight: FontWeight.w300),),
+            ],
+          ),
         ],
       ),
     );
