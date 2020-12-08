@@ -41,6 +41,7 @@ class _AddMuseosState extends State<AddMuseos> {
   void initState() {
     museo = Provider.of<MuseoProvider>(context,listen: false);
     super.initState();
+    
   }
   @override
   Widget build(BuildContext context) {
@@ -70,23 +71,6 @@ class _AddMuseosState extends State<AddMuseos> {
     );
   }
 
-  _cuerpoMapa(){
-    return Container(
-                    width: double.infinity,
-                    height: 150,
-                    child: GoogleMap(
-                      mapType: MapType.normal,
-                      markers: _markers,
-                      initialCameraPosition: kGooglePlex,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
-                        mapController = controller;
-                        
-                      },
-                      
-                    ),
-                  );
-  }
 
   _labelNombre({TextEditingController controller,String descripcion, int minLines}){
     return Container(
@@ -421,6 +405,7 @@ class _AddMuseosState extends State<AddMuseos> {
   Set<Marker> _markers = {};
   Position position ;
   List<double> coord = [0,0];
+
   Future<void> _goToTheLake(_kLake,position) async {
     _markers={};
      final GoogleMapController controller = await _controller.future;
@@ -477,6 +462,75 @@ class _AddMuseosState extends State<AddMuseos> {
       ),
     );
   }
+
+LatLng posicion ;
+  _cuerpoMapa(){
+    return Container(
+              width: double.infinity,
+              height: 150,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  GoogleMap(
+                    mapType: MapType.normal,
+                    //markers: _markers,
+                    onCameraIdle: () {
+                      print("onCameraIdle");
+                      _moverAlCentro(posicion);
+                    },
+                    onCameraMove: (position) {
+                      // print("=> $position");
+                      posicion = position.target;
+                      // _goToTheLake(kLake, position);
+                    },
+                    onCameraMoveStarted: () {
+                      print("onCameraMoveStarted");
+                      setState(() {
+                      _markers={};
+                        
+                      });
+                    },
+                    initialCameraPosition: kGooglePlex,
+
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller.complete(controller);
+                      mapController = controller;
+                      
+                    },
+                    
+                  ),
+                  Positioned(
+                    child: IgnorePointer(child: Image.asset("assets/images/marker.png",width: 50,height: 50,)),
+                    bottom: 75,
+                  ),
+                ],
+              ),
+            );
+  }
+
+  Future<void> _moverAlCentro(position) async {
+    _markers={};
+    if(position!=null){
+      _markers.add(
+            Marker(
+              draggable: true,
+               markerId: MarkerId('Terminal'),
+               position: LatLng(position.latitude, position.longitude),
+               onDragEnd: (newPosition) {
+                  coord[0]=newPosition.latitude;
+                  coord[1]=newPosition.longitude;
+                  print(coord[0]);
+                  print(coord[1]);
+               },
+            ));
+    setState(() {
+      
+    });
+    }
+
+    
+  }
+
 
   /////
    _botonEnviar(){
