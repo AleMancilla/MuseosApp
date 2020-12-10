@@ -7,12 +7,16 @@ import 'package:museosapp/Pages/HomePage.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/////////////////////////////////////////////////////
+///[PANTALLA DE SPLASHSCREEN]
+/////////////////////////////////////////////////////
 class SplashScreenPage extends StatefulWidget {
   @override
   _SplashScreenPageState createState() => _SplashScreenPageState();
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage> {
+  ///[SharedPreferences - PERSISTENCIA DE DATOS]
   SharedPreferences myPrefs;
 
   @override
@@ -22,10 +26,15 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
   }
 
   cargando()async{
+    /////////////////////////////////////////////////////
+    ///[INICIAMOS OBTENIENDO LO GUARDADO EN PREFERENS]
+    /////////////////////////////////////////////////////
     myPrefs = await SharedPreferences.getInstance();
   }
   @override
   Widget build(BuildContext context) {
+    ///[sPLASH SCREEN]
+    ///[DESPUES DE 2 SEGUNDOS IRA A LA FUNCION _comprobandoPage]
     return AnimatedSplashScreen.withScreenFunction(
       splash: 'assets/images/descarga.png',
       duration: 2000,
@@ -37,12 +46,12 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
 
   Future<Widget> _comprobandoPage()async{
     bool state = await comprovandoPago();
-    print("""
+    /////////////////////////////////////////////////////
+    ///[VERIFICA SI EL USUARIO EXISTE O NO]
+    ///[SI NO EXISTE PIDE CREAR UNA CUENTA]
+    ///[SI EXISTE REDIRECCIONA A LA PAGINA PRINCIPAL]
+    /////////////////////////////////////////////////////
     
-    ${myPrefs.getString("email")}
-    ${myPrefs.getString("pass")}
-    
-    """);
     if(state){
       if(myPrefs.getString("email")!=null && myPrefs.getString("pass")!=null){
         List usuario = await iniciandoSesion(email: myPrefs.getString("email"), pass: myPrefs.getString("pass"));
@@ -71,6 +80,9 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       }
     }
     print(state);
+    /////////////////////////////////////////////////////
+    ///[REDIRECCIONA A LA PAGINA DE LOGUEO]
+    /////////////////////////////////////////////////////
     return BienvenidaPage();
   }
 }

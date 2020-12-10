@@ -1,7 +1,9 @@
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+/////////////////////////////////////////////////////
+///[PANTALLA DE COMPRA DE BOLETOS]
+/////////////////////////////////////////////////////
 class AlertDialogCompra extends StatefulWidget {
   final double nacional;
   final double extrangero;

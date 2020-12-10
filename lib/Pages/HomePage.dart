@@ -10,6 +10,9 @@ import 'package:museosapp/Widgets/ButtomBar.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/////////////////////////////////////////////////////
+///[PANTALLA PRICIPAL MAIN ]
+/////////////////////////////////////////////////////
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();

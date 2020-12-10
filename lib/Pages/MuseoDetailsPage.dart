@@ -9,6 +9,11 @@ import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/AlertDialogCompra.dart';
 import 'package:museosapp/Pages/ListMuseos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/////////////////////////////////////////////////////
+    ///[PANTALLA DE DESCRIPCION DEL MUSEO]
+    /////////////////////////////////////////////////////
+
 class MuseoPage extends StatefulWidget {
   final MuseoItem museo;
   

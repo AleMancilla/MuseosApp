@@ -5,6 +5,9 @@ import 'package:graphql/client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+/////////////////////////////////////////////////////
+///[TODAS LAS CONECCIONES A LA BASE DE DATOS ]
+/////////////////////////////////////////////////////
 final HttpLink _httpLink = HttpLink(
     uri: 'https://museosapp.herokuapp.com/v1/graphql',
     headers: {

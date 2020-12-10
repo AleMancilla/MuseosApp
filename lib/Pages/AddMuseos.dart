@@ -7,6 +7,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,10 @@ import 'dart:convert';
 import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Providers/MuseoProvider.dart';
 import 'package:provider/provider.dart';
+
+/////////////////////////////////////////////////////
+///[PANTALLA DE AGREGAR UN MUSEO]
+/////////////////////////////////////////////////////
 
 class AddMuseos extends StatefulWidget {
   @override
@@ -37,12 +42,14 @@ class _AddMuseosState extends State<AddMuseos> {
   String horaApertura ;
   String horaCierre ;
   MuseoProvider museo;
+  String direccion = "";
   @override
   void initState() {
     museo = Provider.of<MuseoProvider>(context,listen: false);
     super.initState();
     
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -50,6 +57,7 @@ class _AddMuseosState extends State<AddMuseos> {
         children: [
           _botonObtenerGeo(),
           _cuerpoMapa(),
+          Text(direccion),
           Expanded(
             // height: 200,
             child: SingleChildScrollView(
@@ -400,6 +408,23 @@ class _AddMuseosState extends State<AddMuseos> {
     target: LatLng(-16.4825542, -68.1213619),
     zoom: 14.4746,
   );
+
+
+
+  @override
+  void didChangeDependencies() async{
+    super.didChangeDependencies();
+    
+    List<Placemark> placemarks = await placemarkFromCoordinates(-16.4825542, -68.1213619);
+    direccion = placemarks[0].locality +", "+ placemarks[0].street ;
+    print("""
+    ----------------
+
+    $placemarks
+
+    ----------------
+    """);
+  }
 
   GoogleMapController mapController;
   Set<Marker> _markers = {};

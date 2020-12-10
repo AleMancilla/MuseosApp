@@ -5,6 +5,12 @@ import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/HomePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+/////////////////////////////////////////////////////
+    ///[PANTALLA DE LOGIN]
+    /////////////////////////////////////////////////////
+
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();

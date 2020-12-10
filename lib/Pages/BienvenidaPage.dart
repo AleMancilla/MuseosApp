@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:museosapp/Pages/LoginPage.dart';
 import 'package:museosapp/Pages/RegisterPage.dart';
 
+/////////////////////////////////////////////////////
+///[PANTALLA DE BIENVENIDA]
+/////////////////////////////////////////////////////
+///
 class BienvenidaPage extends StatelessWidget {
+  /////////////////////////////////////////////////////
+    ///[BUILD CREA LA PANTALLA VISIBLE]
+    /////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -18,6 +25,9 @@ class BienvenidaPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            /////////////////////////////////////////////////////
+            ///[MUESTRA 2 PANTALLAS UNA DE LOGIN Y LA OTRA DE REGISTRO]
+            /////////////////////////////////////////////////////
             _botonLogin(context),
             _botonRegister(context)
           ],
@@ -26,6 +36,9 @@ class BienvenidaPage extends StatelessWidget {
     );
   }
 
+/////////////////////////////////////////////////////
+    ///[PANTALLA DE LOGIN]
+    /////////////////////////////////////////////////////
   _botonLogin(BuildContext context){
     return Container(
       padding: EdgeInsets.all(10),
@@ -39,6 +52,10 @@ class BienvenidaPage extends StatelessWidget {
       ),
     );
   }
+
+  /////////////////////////////////////////////////////
+    ///[PANTALLA DE REGISTRO]
+    /////////////////////////////////////////////////////
   _botonRegister(BuildContext context){
     return Container(
       padding: EdgeInsets.all(10),

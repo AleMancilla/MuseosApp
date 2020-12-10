@@ -4,6 +4,11 @@ import 'package:like_button/like_button.dart';
 import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/MuseoDetailsPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
+/////////////////////////////////////////////////////
+///[PANTALLA DE LISTADO DE MUSEOS]
+/////////////////////////////////////////////////////
 class ListMuseos extends StatefulWidget {
   @override
   _ListMuseosState createState() => _ListMuseosState();

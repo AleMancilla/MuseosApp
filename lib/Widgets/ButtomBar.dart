@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:museosapp/Providers/MuseoProvider.dart';
 import 'package:provider/provider.dart';
 
+/////////////////////////////////////////////////////
+///[BOTON PERSONALIZADO]
+/////////////////////////////////////////////////////
 class ButtomBar extends StatefulWidget {
   @override
   _ButtomBarState createState() => _ButtomBarState();

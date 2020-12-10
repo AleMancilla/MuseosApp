@@ -5,10 +5,16 @@ import 'package:museosapp/DB/GraphQl.dart';
 import 'package:museosapp/Pages/HomePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/////////////////////////////////////////////////////
+    ///[PANTALLA DE REGISTRO]
+    /////////////////////////////////////////////////////
+
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
+
+
 
 class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _email = new TextEditingController();
